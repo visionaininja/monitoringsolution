@@ -1,4 +1,4 @@
-name: Build and Push Monitoring Agent
+name: Build and Deploy Monitoring Agent
 
 on:
   push:
@@ -10,7 +10,7 @@ permissions:
 
 env:
   IMAGE: visionaininja/monitoringagent
-  DEPLOY_DIR: ${{ github.workspace }}/../monitoring-agent
+  DEPLOY_DIR: ~/monitoring-agent
 
 jobs:
   build-and-deploy:
@@ -40,33 +40,83 @@ jobs:
           build-args: |
             BUILD_DATE=${{ github.run_id }}-${{ github.sha }}
 
-      - name: Ensure monitoring stack is running with Watchtower
+      - name: Prepare deployment directory
         run: |
-          DEPLOY_DIR=~/monitoring-agent
-          mkdir -p $DEPLOY_DIR/server/keys
-          sudo chown -R $USER:$USER $DEPLOY_DIR
+          mkdir -p ${{ env.DEPLOY_DIR }}/server/keys
+          sudo chown -R $USER:$USER ${{ env.DEPLOY_DIR }}
 
-          # Seed config only on first run
-          if [ -d $DEPLOY_DIR/server/config.json ]; then
-            rm -rf $DEPLOY_DIR/server/config.json
-          fi
-          if [ ! -f $DEPLOY_DIR/server/config.json ]; then
-            cp server/config.example.json $DEPLOY_DIR/server/config.json
+          # Fix config.json if Docker created it as a directory
+          if [ -d ${{ env.DEPLOY_DIR }}/server/config.json ]; then
+            rm -rf ${{ env.DEPLOY_DIR }}/server/config.json
           fi
 
-          # Keep SSH key in sync
+          # Seed config only on first run — preserves live config on subsequent runs
+          if [ ! -f ${{ env.DEPLOY_DIR }}/server/config.json ]; then
+            cp server/config.example.json ${{ env.DEPLOY_DIR }}/server/config.json
+          fi
+
+          # Sync SSH key
           if [ -f ~/.ssh/bastion.key ]; then
-            cp ~/.ssh/bastion.key $DEPLOY_DIR/server/keys/bastion.key
-            chmod 600 $DEPLOY_DIR/server/keys/bastion.key
+            cp ~/.ssh/bastion.key ${{ env.DEPLOY_DIR }}/server/keys/bastion.key
+            chmod 600 ${{ env.DEPLOY_DIR }}/server/keys/bastion.key
           fi
 
           # Copy latest docker-compose from repo
-          cp docker-compose.yml $DEPLOY_DIR/
+          cp docker-compose.yml ${{ env.DEPLOY_DIR }}/
 
-          cd $DEPLOY_DIR
+      - name: Deploy latest image
+        run: |
+          cd ${{ env.DEPLOY_DIR }}
+          docker compose pull
+          docker compose up -d --remove-orphans --force-recreate
+          docker image prune -f
 
-          # Start stack if not running (Watchtower will handle all future updates)
-          docker compose up -d --remove-orphans
+      - name: Patch Caddy reverse proxy (idempotent)
+        run: |
+          if [ -d ~/app ]; then
+            sudo chown -R $USER:$USER ~/app
+          fi
 
-          # If already running, Watchtower will auto-pull the new image within 60s
-          echo "✅ Stack is up. Watchtower will auto-deploy the new image within 60s."
+          # Add monitoring domain to Caddyfile (once)
+          if [ -f ~/app/Caddyfile ]; then
+            if ! grep -q "rdpubana-monitoring.ddns.net" ~/app/Caddyfile; then
+              printf '\nrdpubana-monitoring.ddns.net {\n    reverse_proxy host.docker.internal:4000\n}\n' >> ~/app/Caddyfile
+            fi
+          fi
+
+          # Inject host.docker.internal into portfolio docker-compose (once)
+          python3 - <<'EOF'
+          import os
+          path = '/home/ubuntu/app/docker-compose.yml'
+          if os.path.exists(path):
+              with open(path, 'r') as f:
+                  content = f.read()
+              if 'host.docker.internal' not in content:
+                  lines = content.splitlines()
+                  for idx, line in enumerate(lines):
+                      if 'ports:' in line:
+                          lines.insert(idx + 3, '    extra_hosts:')
+                          lines.insert(idx + 4, '      - "host.docker.internal:host-gateway"')
+                          break
+                  with open(path, 'w') as f:
+                      f.write(os.linesep.join(lines) + os.linesep)
+          EOF
+
+          # Reload Caddy
+          if [ -d ~/app ]; then
+            cd ~/app
+            docker compose up -d --force-recreate caddy
+          fi
+
+      - name: Verify deployment
+        run: |
+          sleep 5
+          CONTAINER_ID=$(docker compose -f ${{ env.DEPLOY_DIR }}/docker-compose.yml ps -q monitoringagent 2>/dev/null)
+          STATUS=$(docker inspect --format='{{.State.Status}}' $CONTAINER_ID 2>/dev/null || echo "unknown")
+          echo "Container status: $STATUS"
+          if [ "$STATUS" != "running" ]; then
+            echo "::error::Container failed to start!"
+            docker compose -f ${{ env.DEPLOY_DIR }}/docker-compose.yml logs --tail=50
+            exit 1
+          fi
+          echo "✅ Deployment successful — latest image is live"
