@@ -10,7 +10,7 @@ permissions:
 
 env:
   IMAGE: visionaininja/monitoringagent
-  DEPLOY_DIR: ~/monitoring-agent
+  DEPLOY_DIR: /home/ubuntu/monitoring-agent
 
 jobs:
   build-and-deploy:
