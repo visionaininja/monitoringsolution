@@ -1,4 +1,4 @@
-name: Build and Deploy Monitoring Agent
+name: Build and Push Monitoring Agent
 
 on:
   push:
@@ -10,17 +10,16 @@ permissions:
 
 env:
   IMAGE: visionaininja/monitoringagent
-  DEPLOY_DIR: ~/monitoring-agent
+  DEPLOY_DIR: ${{ github.workspace }}/../monitoring-agent
 
 jobs:
-  # ── Job 1: Build & Push ────────────────────────────────────────────────────
-  build:
+  build-and-deploy:
     runs-on: self-hosted
-    outputs:
-      image_tag: ${{ steps.meta.outputs.version }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          clean: true
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -31,115 +30,43 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Extract image metadata
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.IMAGE }}
-          tags: |
-            type=raw,value=latest
-            type=sha,prefix=sha-
-
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v6
         with:
           context: .
           push: true
           no-cache: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: ${{ env.IMAGE }}:latest
           build-args: |
             BUILD_DATE=${{ github.run_id }}-${{ github.sha }}
-          cache-from: type=registry,ref=${{ env.IMAGE }}:buildcache
-          cache-to: type=registry,ref=${{ env.IMAGE }}:buildcache,mode=max
 
-  # ── Job 2: Deploy ─────────────────────────────────────────────────────────
-  deploy:
-    runs-on: self-hosted
-    needs: build
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Prepare deployment directory
+      - name: Ensure monitoring stack is running with Watchtower
         run: |
-          mkdir -p ${{ env.DEPLOY_DIR }}/server/keys
-          sudo chown -R $USER:$USER ${{ env.DEPLOY_DIR }}
+          DEPLOY_DIR=~/monitoring-agent
+          mkdir -p $DEPLOY_DIR/server/keys
+          sudo chown -R $USER:$USER $DEPLOY_DIR
 
-          # Fix: remove config.json if Docker erroneously created it as a directory
-          if [ -d ${{ env.DEPLOY_DIR }}/server/config.json ]; then
-            rm -rf ${{ env.DEPLOY_DIR }}/server/config.json
+          # Seed config only on first run
+          if [ -d $DEPLOY_DIR/server/config.json ]; then
+            rm -rf $DEPLOY_DIR/server/config.json
+          fi
+          if [ ! -f $DEPLOY_DIR/server/config.json ]; then
+            cp server/config.example.json $DEPLOY_DIR/server/config.json
           fi
 
-          # Seed config only if it doesn't already exist (preserve live config)
-          if [ ! -f ${{ env.DEPLOY_DIR }}/server/config.json ]; then
-            cp server/config.example.json ${{ env.DEPLOY_DIR }}/server/config.json
-          fi
-
-          # Copy SSH key if available
+          # Keep SSH key in sync
           if [ -f ~/.ssh/bastion.key ]; then
-            cp ~/.ssh/bastion.key ${{ env.DEPLOY_DIR }}/server/keys/bastion.key
-            chmod 600 ${{ env.DEPLOY_DIR }}/server/keys/bastion.key
+            cp ~/.ssh/bastion.key $DEPLOY_DIR/server/keys/bastion.key
+            chmod 600 $DEPLOY_DIR/server/keys/bastion.key
           fi
 
           # Copy latest docker-compose from repo
-          cp docker-compose.yml ${{ env.DEPLOY_DIR }}/
+          cp docker-compose.yml $DEPLOY_DIR/
 
-      - name: Pull latest image and redeploy
-        run: |
-          cd ${{ env.DEPLOY_DIR }}
-          # Always pull fresh image — prevents stale deploys
-          docker compose pull
-          docker compose up -d --remove-orphans --force-recreate
-          # Clean up old dangling images
-          docker image prune -f
+          cd $DEPLOY_DIR
 
-      - name: Patch Caddy reverse proxy (idempotent)
-        run: |
-          if [ -d ~/app ]; then
-            sudo chown -R $USER:$USER ~/app
-          fi
+          # Start stack if not running (Watchtower will handle all future updates)
+          docker compose up -d --remove-orphans
 
-          # 1. Add monitoring domain to Caddyfile (once)
-          if [ -f ~/app/Caddyfile ]; then
-            if ! grep -q "rdpubana-monitoring.ddns.net" ~/app/Caddyfile; then
-              printf '\nrdpubana-monitoring.ddns.net {\n    reverse_proxy host.docker.internal:4000\n}\n' >> ~/app/Caddyfile
-            fi
-          fi
-
-          # 2. Add host.docker.internal to portfolio docker-compose (once)
-          python3 - <<'EOF'
-          import os
-          path = '/home/ubuntu/app/docker-compose.yml'
-          if os.path.exists(path):
-              with open(path, 'r') as f:
-                  content = f.read()
-              if 'host.docker.internal' not in content:
-                  lines = content.splitlines()
-                  for idx, line in enumerate(lines):
-                      if 'ports:' in line:
-                          lines.insert(idx + 3, '    extra_hosts:')
-                          lines.insert(idx + 4, '      - "host.docker.internal:host-gateway"')
-                          break
-                  with open(path, 'w') as f:
-                      f.write(os.linesep.join(lines) + os.linesep)
-          EOF
-
-          # 3. Reload Caddy to pick up config changes
-          if [ -d ~/app ]; then
-            cd ~/app
-            docker compose up -d --force-recreate caddy
-          fi
-
-      - name: Verify deployment
-        run: |
-          echo "Waiting for container to be healthy..."
-          sleep 5
-          STATUS=$(docker inspect --format='{{.State.Status}}' $(docker compose -f ${{ env.DEPLOY_DIR }}/docker-compose.yml ps -q) 2>/dev/null || echo "unknown")
-          echo "Container status: $STATUS"
-          if [ "$STATUS" != "running" ]; then
-            echo "::error::Container is not running after deploy!"
-            docker compose -f ${{ env.DEPLOY_DIR }}/docker-compose.yml logs --tail=50
-            exit 1
-          fi
-          echo "✅ Deployment successful"
+          # If already running, Watchtower will auto-pull the new image within 60s
+          echo "✅ Stack is up. Watchtower will auto-deploy the new image within 60s."

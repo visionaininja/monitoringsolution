@@ -3,17 +3,24 @@ version: '3.8'
 services:
   monitoringagent:
     image: visionaininja/monitoringagent:latest
-    build:
-      context: .
-      dockerfile: Dockerfile
     restart: always
     ports:
       - "4000:4000"
     volumes:
-      # Mount the config file to persist configured environments and credentials
       - ./server/config.json:/app/server/config.json
-      # Mount the keys directory to persist uploaded SSH keys
       - ./server/keys:/app/server/keys
     environment:
       - PORT=4000
       - NODE_ENV=production
+
+  # Watchtower: automatically pulls and redeploys when a new image is pushed to Docker Hub
+  watchtower:
+    image: containrrr/watchtower
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - WATCHTOWER_CLEANUP=true          # remove old images after update
+      - WATCHTOWER_POLL_INTERVAL=60      # check Docker Hub every 60 seconds
+      - WATCHTOWER_INCLUDE_RESTARTING=true
+    command: monitoringagent             # only watch this specific container
