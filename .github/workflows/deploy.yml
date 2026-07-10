@@ -82,10 +82,11 @@ jobs:
                   lines = content.splitlines()
                   for idx, line in enumerate(lines):
                       if 'ports:' in line:
-                          lines.insert(idx + 3, '    extra_hosts:\n      - \"host.docker.internal:host-gateway\"')
+                          lines.insert(idx + 3, '    extra_hosts:')
+                          lines.insert(idx + 4, '      - \"host.docker.internal:host-gateway\"')
                           break
                   with open(path, 'w') as f:
-                      f.write('\n'.join(lines) + '\n')
+                      f.write(os.linesep.join(lines) + os.linesep)
           '''
           exec(textwrap.dedent(code))
           "
