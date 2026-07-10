@@ -47,7 +47,7 @@ export default function Login() {
     setError(null);
 
     // Hardcoded credentials as requested
-    if (username === 'admin123' && password === 'admin') {
+    if (username === 'admin' && password === 'admin') {
       // Success! Reset security counters
       setFailedAttempts(0);
       setLockoutEndTime(null);
