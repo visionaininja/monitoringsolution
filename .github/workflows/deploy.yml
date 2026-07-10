@@ -30,7 +30,6 @@ jobs:
           context: .
           push: true
           tags: visionaininja/monitoringagent:latest
-          no-cache: true
           cache-from: type=registry,ref=visionaininja/monitoringagent:buildcache
           cache-to: type=registry,ref=visionaininja/monitoringagent:buildcache,mode=max
 

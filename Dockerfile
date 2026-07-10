@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 # ─── Stage 1: Build Frontend ─────────────────────────────────────────────────
-FROM node:20-alpine AS frontend-builder
+FROM node:22-alpine AS frontend-builder
 WORKDIR /app
 
 # Upgrade npm once, cached across builds via BuildKit cache mount
@@ -23,7 +23,7 @@ COPY public/ ./public/
 RUN npm run build
 
 # ─── Stage 2: Production Runtime ─────────────────────────────────────────────
-FROM node:20-alpine
+FROM node:22-alpine
 WORKDIR /app
 
 # Upgrade npm, cached
