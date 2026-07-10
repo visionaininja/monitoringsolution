@@ -379,6 +379,14 @@ export default function Settings() {
     }
   }, [])
 
+  const [tokenSaved, setTokenSaved] = useState(false)
+
+  const handleSaveToken = () => {
+    setGitHubToken(pat)
+    setTokenSaved(true)
+    setTimeout(() => setTokenSaved(false), 2500)
+  }
+
   const handleValidate = async () => {
     setValidating(true)
     setTokenError(null)
@@ -475,17 +483,35 @@ export default function Settings() {
                 </div>
                 <p className="text-xs text-muted-foreground">Needs scopes: <code className="bg-muted px-1 rounded">repo</code>, <code className="bg-muted px-1 rounded">admin:repo_hook</code></p>
               </div>
-              <div className="flex items-center justify-between mt-4">
-                <Button onClick={handleValidate} disabled={validating} variant="secondary">
+              <div className="flex gap-2 mt-4">
+                <Button onClick={handleValidate} disabled={validating} variant="secondary" className="flex-1">
                   {validating ? "Validating..." : "Validate Token"}
                 </Button>
+                <Button
+                  onClick={handleSaveToken}
+                  disabled={!pat}
+                  className={cn(
+                    "flex-1 flex items-center justify-center gap-1.5 transition-all border",
+                    tokenSaved
+                      ? "bg-emerald-600/20 text-emerald-400 border-emerald-500/30 hover:bg-emerald-600/20 hover:text-emerald-400"
+                      : "bg-primary/10 text-primary border-primary/20 hover:bg-primary/20"
+                  )}
+                >
+                  {tokenSaved ? (
+                    <><CheckCircle2 className="h-3.5 w-3.5" /> Saved!</>
+                  ) : (
+                    <><Save className="h-3.5 w-3.5" /> Save Token</>
+                  )}
+                </Button>
+              </div>
+              <div className="flex items-center justify-between mt-2 min-h-[24px]">
                 {isTokenValid === true && (
                   <Badge variant="success" className="flex items-center gap-1">
                     <CheckCircle2 className="h-3 w-3" /> Valid Scopes
                   </Badge>
                 )}
                 {isTokenValid === false && (
-                  <div className="flex flex-col items-end gap-1">
+                  <div className="flex flex-col items-end gap-1 w-full">
                     <Badge variant="destructive">Invalid Token</Badge>
                     {tokenError && (
                       <span className="text-[10px] font-medium text-rose-400 max-w-[200px] text-right break-words leading-tight mt-1">
