@@ -29,8 +29,18 @@ jobs:
 
       - name: Deploy Local Docker Compose
         run: |
-          # Create app directory if it doesn't exist
-          mkdir -p ~/monitoring-agent
+          # Create app and keys directory if it doesn't exist
+          mkdir -p ~/monitoring-agent/server/keys
+
+          # Clean up config.json if Docker created it as a directory during a failed mount
+          if [ -d ~/monitoring-agent/server/config.json ]; then
+            rm -rf ~/monitoring-agent/server/config.json
+          fi
+
+          # Copy default config if it doesn't exist on the host to avoid mount errors
+          if [ ! -f ~/monitoring-agent/server/config.json ]; then
+            cp server/config.example.json ~/monitoring-agent/server/config.json
+          fi
 
           # Copy configs to deployment directory
           cp docker-compose.yml Caddyfile ~/monitoring-agent/

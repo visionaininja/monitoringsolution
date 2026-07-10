@@ -3,8 +3,8 @@ FROM node:20-alpine AS frontend-builder
 WORKDIR /app
 
 # Copy dependency configs
-COPY package.json package-lock.json ./
-RUN npm ci --legacy-peer-deps
+COPY package.json ./
+RUN npm install --legacy-peer-deps
 
 # Copy project files
 COPY tsconfig.json tsconfig.node.json vite.config.ts postcss.config.js tailwind.config.js index.html ./
@@ -19,9 +19,9 @@ FROM node:20-alpine
 WORKDIR /app
 
 # Install backend dependencies
-COPY server/package.json server/package-lock.json* ./server/
+COPY server/package.json ./server/
 WORKDIR /app/server
-RUN npm ci --only=production --legacy-peer-deps || npm install --only=production --legacy-peer-deps
+RUN npm install --only=production --legacy-peer-deps
 
 # Copy backend files
 WORKDIR /app
