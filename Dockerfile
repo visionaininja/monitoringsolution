@@ -4,10 +4,7 @@ WORKDIR /app
 
 # Copy dependency configs
 COPY package.json ./
-
-# Leverage Docker BuildKit cache mount for lightning-fast npm installations and suppress deprecation warnings
-RUN --mount=type=cache,target=/root/.npm \
-    npm install --legacy-peer-deps --no-audit --no-fund --loglevel=error
+RUN npm install --legacy-peer-deps --no-audit --no-fund --loglevel=error
 
 # Copy project files
 COPY tsconfig.json tsconfig.node.json vite.config.ts postcss.config.js tailwind.config.js index.html ./
@@ -21,11 +18,10 @@ RUN npm run build
 FROM node:20-alpine
 WORKDIR /app
 
-# Install backend dependencies with BuildKit cache mount
+# Install backend dependencies
 COPY server/package.json ./server/
 WORKDIR /app/server
-RUN --mount=type=cache,target=/root/.npm \
-    npm install --only=production --legacy-peer-deps --no-audit --no-fund --loglevel=error
+RUN npm install --only=production --legacy-peer-deps --no-audit --no-fund --loglevel=error
 
 # Copy backend files
 WORKDIR /app
