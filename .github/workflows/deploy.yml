@@ -49,7 +49,7 @@ jobs:
           fi
 
           # Copy configs to deployment directory
-          cp docker-compose.yml Caddyfile ~/monitoring-agent/
+          cp docker-compose.yml ~/monitoring-agent/
 
           # Navigate and deploy
           cd ~/monitoring-agent

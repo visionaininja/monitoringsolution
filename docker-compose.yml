@@ -7,8 +7,8 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: always
-    expose:
-      - "4000"
+    ports:
+      - "4000:4000"
     volumes:
       # Mount the config file to persist configured environments and credentials
       - ./server/config.json:/app/server/config.json
@@ -17,20 +17,3 @@ services:
     environment:
       - PORT=4000
       - NODE_ENV=production
-
-  caddy:
-    image: caddy:alpine
-    restart: always
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile
-      - caddy_data:/data
-      - caddy_config:/config
-    depends_on:
-      - monitoringagent
-
-volumes:
-  caddy_data:
-  caddy_config:
