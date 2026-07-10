@@ -4,7 +4,7 @@ WORKDIR /app
 
 # Copy dependency configs
 COPY package.json package-lock.json ./
-RUN npm ci
+RUN npm ci --legacy-peer-deps
 
 # Copy project files
 COPY tsconfig.json tsconfig.node.json vite.config.ts postcss.config.js tailwind.config.js index.html ./
@@ -21,7 +21,7 @@ WORKDIR /app
 # Install backend dependencies
 COPY server/package.json server/package-lock.json* ./server/
 WORKDIR /app/server
-RUN npm ci --only=production || npm install --only=production
+RUN npm ci --only=production --legacy-peer-deps || npm install --only=production --legacy-peer-deps
 
 # Copy backend files
 WORKDIR /app
