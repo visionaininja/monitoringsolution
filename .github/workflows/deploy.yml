@@ -45,20 +45,41 @@ jobs:
           mkdir -p ${{ env.DEPLOY_DIR }}/server/keys
           sudo chown -R $USER:$USER ${{ env.DEPLOY_DIR }}
 
-          # Fix config.json if Docker created it as a directory
+          # Fix: Docker sometimes creates config.json as a directory on failed mounts
           if [ -d ${{ env.DEPLOY_DIR }}/server/config.json ]; then
             rm -rf ${{ env.DEPLOY_DIR }}/server/config.json
           fi
 
-          # Seed config only on first run — preserves live config on subsequent runs
+          # Seed config on first run
           if [ ! -f ${{ env.DEPLOY_DIR }}/server/config.json ]; then
             cp server/config.example.json ${{ env.DEPLOY_DIR }}/server/config.json
+            echo "✅ Config seeded from example"
           fi
 
-          # Sync SSH key
+          # Always force-sync the dev SSH env from repo config.example.json
+          # This ensures the correct host/key settings are always in the live config
+          python3 - <<'PYEOF'
+          import json, sys, os
+          live = os.path.expanduser('${{ env.DEPLOY_DIR }}/server/config.json')
+          example = 'server/config.example.json'
+          with open(live) as f:
+              cfg = json.load(f)
+          with open(example) as f:
+              ex = json.load(f)
+          # Merge envs from example into live config (overwrites SSH settings, keeps extra keys)
+          cfg.setdefault('envs', {}).update(ex.get('envs', {}))
+          with open(live, 'w') as f:
+              json.dump(cfg, f, indent=2)
+          print("✅ Dev SSH config synced from config.example.json")
+          PYEOF
+
+          # Sync SSH key and warn if missing
           if [ -f ~/.ssh/bastion.key ]; then
             cp ~/.ssh/bastion.key ${{ env.DEPLOY_DIR }}/server/keys/bastion.key
             chmod 600 ${{ env.DEPLOY_DIR }}/server/keys/bastion.key
+            echo "✅ bastion.key synced"
+          else
+            echo "::warning::~/.ssh/bastion.key not found — VM metrics will fail!"
           fi
 
           # Copy latest docker-compose from repo
