@@ -29,7 +29,13 @@ jobs:
 
       - name: Deploy Local Docker Compose
         run: |
-          # Create app and keys directory if it doesn't exist
+          # Create app directory if it doesn't exist
+          mkdir -p ~/monitoring-agent
+
+          # Ensure the runner user owns the deployment directory (reclaims files created as root by previous docker mounts)
+          sudo chown -R $USER:$USER ~/monitoring-agent
+
+          # Create keys directory
           mkdir -p ~/monitoring-agent/server/keys
 
           # Clean up config.json if Docker created it as a directory during a failed mount
