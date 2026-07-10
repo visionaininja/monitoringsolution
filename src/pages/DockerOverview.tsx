@@ -12,14 +12,14 @@ import { cn } from "@/lib/utils"
 import { fmtRelative, DetailOverlay } from "@/components/OverviewHelpers"
 
 // --- The Docker Section ---
-function DockerOverviewSection({ environment: _environment }: { environment: Environment }) {
+function DockerOverviewSection({ environment }: { environment: Environment }) {
   const [showTagsModal, setShowTagsModal] = useState(false)
   const [showPushModal, setShowPushModal] = useState(false)
   const [pushIndex, setPushIndex] = useState(0)
   const dockerTagsQuery = useQuery({
-    queryKey: ["docker-tags"],
+    queryKey: ["docker-tags", environment],
     queryFn: async () => {
-      const resp = await fetch("/api/docker-recent-pulls")
+      const resp = await fetch(`/api/docker-recent-pulls?env=${environment}`)
       if (!resp.ok) throw new Error(`Docker API error: ${resp.status}`)
       return resp.json()
     },
@@ -41,9 +41,9 @@ function DockerOverviewSection({ environment: _environment }: { environment: Env
   })
 
   const dockerNetQuery = useQuery({
-    queryKey: ["docker-network"],
+    queryKey: ["docker-network", environment],
     queryFn: async () => {
-      const resp = await fetch("/api/docker-network")
+      const resp = await fetch(`/api/docker-network?env=${environment}`)
       if (!resp.ok) throw new Error(`Docker network API error: ${resp.status}`)
       return resp.json()
     },

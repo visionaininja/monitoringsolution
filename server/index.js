@@ -1320,7 +1320,7 @@ app.get('/api/docker-recent-pulls', async (req, res) => {
 
 // â”€â”€â”€ Docker Network Flow â€” SSH Bastion Check â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 app.get('/api/docker-network', async (req, res) => {
-  const env = req.query.env || 'staging' // fallback to staging if not provided
+  const env = req.query.env || 'dev' // fallback to dev if not provided
   const envCfg = (CONFIG.envs || {})[env]
   if (!envCfg) return res.status(400).json({ error: 'unknown env' })
 

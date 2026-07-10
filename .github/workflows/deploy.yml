@@ -73,14 +73,28 @@ jobs:
           print("✅ Dev SSH config synced from config.example.json")
           PYEOF
 
-          # Sync SSH key and warn if missing
-          if [ -f ~/.ssh/bastion.key ]; then
-            cp ~/.ssh/bastion.key ${{ env.DEPLOY_DIR }}/server/keys/bastion.key
-            chmod 600 ${{ env.DEPLOY_DIR }}/server/keys/bastion.key
-            echo "✅ bastion.key synced"
-          else
-            echo "::warning::~/.ssh/bastion.key not found — VM metrics will fail!"
+          # Sync SSH key. If bastion.key is missing, generate a dedicated one and authorize it on the host VM automatically.
+          KEY_PATH="${{ env.DEPLOY_DIR }}/server/keys/bastion.key"
+          if [ ! -f "$KEY_PATH" ]; then
+            if [ -f ~/.ssh/bastion.key ]; then
+              cp ~/.ssh/bastion.key "$KEY_PATH"
+              echo "✅ bastion.key copied from ~/.ssh/bastion.key"
+            else
+              echo "bastion.key not found in ~/.ssh. Generating a new dedicated key pair..."
+              ssh-keygen -t ed25519 -N "" -f "$KEY_PATH"
+              PUBKEY=$(cat "${KEY_PATH}.pub")
+              mkdir -p ~/.ssh
+              chmod 700 ~/.ssh
+              touch ~/.ssh/authorized_keys
+              chmod 600 ~/.ssh/authorized_keys
+              if ! grep -Fq "$PUBKEY" ~/.ssh/authorized_keys; then
+                echo "$PUBKEY" >> ~/.ssh/authorized_keys
+                echo "✅ New dedicated public key appended to ~/.ssh/authorized_keys"
+              fi
+            fi
           fi
+          chmod 600 "$KEY_PATH"
+          echo "✅ bastion.key is present and secure"
 
           # Copy latest docker-compose from repo
           cp docker-compose.yml ${{ env.DEPLOY_DIR }}/
