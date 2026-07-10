@@ -18,6 +18,16 @@ const CONFIG_PATH = path.resolve(__dirname, 'config.json')
 let CONFIG = {}
 try { CONFIG = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8')) } catch (e) { CONFIG = require('./config.example.json') }
 
+// Middleware to reload CONFIG from disk on every API request to pick up external changes
+app.use((req, res, next) => {
+  try {
+    CONFIG = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8'));
+  } catch (e) {
+    try { CONFIG = require('./config.example.json'); } catch (err) { CONFIG = {}; }
+  }
+  next();
+});
+
 function resolveKeyPath(keyRel) {
   return path.isAbsolute(keyRel) ? keyRel : path.resolve(__dirname, keyRel)
 }
