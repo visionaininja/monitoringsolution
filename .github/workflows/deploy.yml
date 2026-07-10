@@ -30,6 +30,8 @@ jobs:
           context: .
           push: true
           tags: visionaininja/monitoringagent:latest
+          build-args: |
+            BUILD_DATE=${{ github.run_id }}-${{ github.sha }}
           cache-from: type=registry,ref=visionaininja/monitoringagent:buildcache
           cache-to: type=registry,ref=visionaininja/monitoringagent:buildcache,mode=max
 

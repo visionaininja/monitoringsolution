@@ -19,6 +19,10 @@ COPY tsconfig.json tsconfig.node.json vite.config.ts postcss.config.js tailwind.
 COPY src/ ./src/
 COPY public/ ./public/
 
+# Cache-bust ARG: ensures src code is always freshly built when pipeline passes BUILD_DATE
+ARG BUILD_DATE=unknown
+RUN echo "Build date: $BUILD_DATE"
+
 # Build the frontend
 RUN npm run build
 
@@ -43,8 +47,9 @@ COPY server/ ./server/
 # Copy built frontend from Stage 1
 COPY --from=frontend-builder /app/dist ./dist
 
-# Initialize keys directory and config
-RUN mkdir -p server/keys && cp server/config.example.json server/config.json || true
+# Initialize keys directory and config (only if not already mounted via volume)
+RUN mkdir -p server/keys && \
+    if [ ! -f server/config.json ]; then cp server/config.example.json server/config.json; fi || true
 
 EXPOSE 4000
 
