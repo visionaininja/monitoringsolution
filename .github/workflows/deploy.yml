@@ -71,20 +71,24 @@ jobs:
 
           # 2. Inject extra_hosts into ~/app/docker-compose.yml if needed
           python3 -c "
-import os
-path = '/home/ubuntu/app/docker-compose.yml'
-if os.path.exists(path):
-    with open(path, 'r') as f:
-        content = f.read()
-    if 'host.docker.internal' not in content:
-        lines = content.splitlines()
-        for idx, line in enumerate(lines):
-            if 'ports:' in line:
-                lines.insert(idx + 3, '    extra_hosts:\n      - \"host.docker.internal:host-gateway\"')
-                break
-        with open(path, 'w') as f:
-            f.write('\n'.join(lines) + '\n')
-"
+          import textwrap
+          code = '''
+          import os
+          path = '/home/ubuntu/app/docker-compose.yml'
+          if os.path.exists(path):
+              with open(path, 'r') as f:
+                  content = f.read()
+              if 'host.docker.internal' not in content:
+                  lines = content.splitlines()
+                  for idx, line in enumerate(lines):
+                      if 'ports:' in line:
+                          lines.insert(idx + 3, '    extra_hosts:\n      - \"host.docker.internal:host-gateway\"')
+                          break
+                  with open(path, 'w') as f:
+                      f.write('\n'.join(lines) + '\n')
+          '''
+          exec(textwrap.dedent(code))
+          "
 
           # 3. Recreate Caddy container to load the new config
           if [ -d ~/app ]; then
