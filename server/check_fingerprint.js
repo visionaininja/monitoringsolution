@@ -1,0 +1,38 @@
+const sshpk = require('sshpk');
+
+const privateKey = `-----BEGIN PRIVATE KEY-----
+MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCyP9HhaGkIQBAP
+SIxuTmBVG+EeErW15BnPRottS8OGogZxfDPOfb9pFr1sMW2AWNueZ7y7fFORmCMd
+n66go47dZ5J4PFWD+Fixj2YryZjxox0gH8apZgfnI7QBFWoMQhMl7yNRFsn2LcVd
+jXI3UMIL3CBYVFme7puDYRvKtbLMFdBIYGfQQ1EmIWqF4/K/89mMbWD0wlOC0zHT
+6PDQcfpM2l/w6zqLmcrdKiKlIpAGNaRnHSzZkOkEcxqfLakVuC4VixKoZuBVE9qF
+B/xZsRjPhrePJnN7TRaXa5FMcTINqK/s3mwYnlPoFOQoGN5YbIXdBbwamu7fdflr
+d/ZyCKmRAgMBAAECggEAT3YK2qjgdbiVUDLfw4a2BArfIrhlf/X1GYVRv4HwYpLV
+O38KW0mMbE0iWVp5fadfFDEbnhrQ6E1BjkGyp9Lx67pxvZ7r4l5yL4mFGw0OXN4B
+rGHt/nNJH523b2o78cX84kLGZC48Dz4dR1S4b3dVYdMaKjZEE4k8E2fVa1rvn3F0
+gWj0hxrJllwLulVRNKawSFMKhTJxGkUkAtmeZzq6Qi9VYyhjGd5PZCahSvAfW/Nh
+JMhQ8dhyM1dkQZlUNdmgX0txiPoKUmfZ8fnwIO1LDbM5YMwI36pF1BK9xNeo5Le5
+D7BajDfqOFjsy5YTOn37oZhKm2OK4hASjjHzbYT77wKBgQDtAeEzhKNI3eAHf2Fj
+66a52xFWO5ytjsbGOjKO1nnDkeH6KGu0uyTSqXlQ5g+qZbyDqG35VRKFeFYl0fiQ
+6JcWd1py6tbRjCTtrk3jbCqqtFlJG5VyOWqhSbO/RRXx+aGvANRynhfKFjol55mk
+9zdkvqGgeaFAdIBkkUPyokvrnwKBgQDAiIo8nWcLPz8V/cBiteV7W17dYTYr8Vs2
+4ZBFwzqx3IMiF9piBZAJ9rrhDuaS5BURg6bmtE1+bZV3NqrZwDjQkFDxBHoMVhUC
+FtsqgI0jUGuR4L9iGBT6ckHHNfJ3cwmutpoNxHoMSUkiy/zmyde+A7SjPVg+WElv
+8UZTzwhczwKBgAqU4OcZ7uhb75qmF0UMyl7V5wpAkxg0na9P/d3euYT/yGUQ1O42
+xMgbBO2Vt/FVpXsDVBWjtLX8z2vU2hIuMECyh3lF/t1QMn3iIFwdAjKo5qua7asx
+4Q7eaYYKoZYyHQPhN5r+b/V31JTIqFVzLCf1UuYFSCvGh8z1p2D32gflAoGBALLI
+190rqPk3tOQ96z1+fWeMVE4srDon+LTAxtERVlq9UwQAtGjbk4K9G5JL3O7AX5QQ
+9ZY8Dc3+ApJeME7eAaQirxbwOklkUkPLZ59TGjyVvB4NXoq/pBNgsBZF0S78oxwb
+MnjgXxkzoHdwhxrkibNIC6CeIWhbYW5S1SSUFsbfAoGBAK4fzYRoK3r7ZQHkdpzP
+1Fnw4A5RN2Pi8BQDWxtr+oUeqm5sQIC2p29wRa4oFlZyTCdEFpbRz7SIi8NE4Qoz
+rKr2DUJmf0TqUBWztlaeF7Zr2VUP3AxVfw/gkoTWX5wtSqeNVhYHPJdAF+YI4T/w
+e+/uxCxpyAKx1aFULg/9gpvC
+-----END PRIVATE KEY-----`;
+
+try {
+  const key = sshpk.parsePrivateKey(privateKey, 'pem');
+  const fingerprint = key.fingerprint('md5').toString();
+  console.log('FINGERPRINT computed:', fingerprint);
+} catch (err) {
+  console.log('ERROR:', err);
+}

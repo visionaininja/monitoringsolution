@@ -1,0 +1,41 @@
+name: Build and Deploy Monitoring Agent
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-deploy:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        run: |
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Build Docker Image (No Cache)
+        run: |
+          docker build --no-cache -t visionaininja/monitoringagent:latest .
+
+      - name: Push Docker Image
+        run: |
+          docker push visionaininja/monitoringagent:latest
+
+      - name: Deploy Local Docker Compose
+        run: |
+          # Create app directory if it doesn't exist
+          mkdir -p ~/monitoring-agent
+
+          # Copy configs to deployment directory
+          cp docker-compose.yml Caddyfile ~/monitoring-agent/
+
+          # Navigate and deploy
+          cd ~/monitoring-agent
+          docker compose up -d --remove-orphans
+          docker image prune -f

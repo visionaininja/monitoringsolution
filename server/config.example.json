@@ -1,0 +1,22 @@
+{
+  "envs": {
+    "dev": {
+      "host": "170.9.233.236",
+      "username": "dev",
+      "keyPath": "keys/dev_key.ppk",
+      "sshPort": "22"
+    },
+    "staging": {
+      "host": "170.9.233.237",
+      "username": "staging",
+      "keyPath": "keys/staging_key.ppk",
+      "sshPort": "22"
+    },
+    "production": {
+      "host": "170.9.233.238",
+      "username": "production",
+      "keyPath": "keys/production_key.ppk",
+      "sshPort": "22"
+    }
+  }
+}

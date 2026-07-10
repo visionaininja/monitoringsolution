@@ -1,0 +1,3 @@
+rdpubana-monitoring.ddns.net {
+    reverse_proxy monitoringagent:4000
+}

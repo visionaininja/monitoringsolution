@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- S shape (circular arcs + horizontal bar) -->
+  <path d="M 82.6 34.8 A 36 36 0 0 0 14 50 L 86 50 A 36 36 0 0 1 17.4 65.2" fill="none" stroke="#c82027" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" />
+  
+  <!-- Y shape -->
+  <path d="M 34 26 L 50 48 L 66 26 M 50 48 L 50 74" fill="none" stroke="#c82027" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" />
+  
+  <!-- Speech bubble tail -->
+  <polygon points="26,72 10,92 40,82" fill="#c82027" />
+</svg>
