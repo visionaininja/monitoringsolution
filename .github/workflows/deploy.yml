@@ -55,3 +55,39 @@ jobs:
           cd ~/monitoring-agent
           docker compose up -d --remove-orphans
           docker image prune -f
+
+          # --- Dynamic Caddy Patching (Avoids modifying professional-portfolio repo) ---
+          # Ensure we have permissions to edit ~/app configs if root-owned
+          if [ -d ~/app ]; then
+            sudo chown -R $USER:$USER ~/app
+          fi
+
+          # 1. Update Caddyfile in ~/app if it exists and doesn't have the domain
+          if [ -f ~/app/Caddyfile ]; then
+            if ! grep -q "rdpubana-monitoring.ddns.net" ~/app/Caddyfile; then
+              echo -e "\nrdpubana-monitoring.ddns.net {\n    reverse_proxy host.docker.internal:4000\n}" >> ~/app/Caddyfile
+            fi
+          fi
+
+          # 2. Inject extra_hosts into ~/app/docker-compose.yml if needed
+          python3 -c "
+import os
+path = '/home/ubuntu/app/docker-compose.yml'
+if os.path.exists(path):
+    with open(path, 'r') as f:
+        content = f.read()
+    if 'host.docker.internal' not in content:
+        lines = content.splitlines()
+        for idx, line in enumerate(lines):
+            if 'ports:' in line:
+                lines.insert(idx + 3, '    extra_hosts:\n      - \"host.docker.internal:host-gateway\"')
+                break
+        with open(path, 'w') as f:
+            f.write('\n'.join(lines) + '\n')
+"
+
+          # 3. Recreate Caddy container to load the new config
+          if [ -d ~/app ]; then
+            cd ~/app
+            docker compose up -d --force-recreate caddy
+          fi
