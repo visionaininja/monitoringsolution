@@ -8,9 +8,16 @@ on:
 permissions:
   contents: read
 
+env:
+  IMAGE: visionaininja/monitoringagent
+  DEPLOY_DIR: ~/monitoring-agent
+
 jobs:
-  build-and-deploy:
+  # ── Job 1: Build & Push ────────────────────────────────────────────────────
+  build:
     runs-on: self-hosted
+    outputs:
+      image_tag: ${{ steps.meta.outputs.version }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -24,69 +31,84 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
+      - name: Extract image metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE }}
+          tags: |
+            type=raw,value=latest
+            type=sha,prefix=sha-
+
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v6
         with:
           context: .
           push: true
-          tags: visionaininja/monitoringagent:latest
+          no-cache: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
           build-args: |
             BUILD_DATE=${{ github.run_id }}-${{ github.sha }}
-          cache-from: type=registry,ref=visionaininja/monitoringagent:buildcache
-          cache-to: type=registry,ref=visionaininja/monitoringagent:buildcache,mode=max
+          cache-from: type=registry,ref=${{ env.IMAGE }}:buildcache
+          cache-to: type=registry,ref=${{ env.IMAGE }}:buildcache,mode=max
 
-      - name: Deploy Local Docker Compose
+  # ── Job 2: Deploy ─────────────────────────────────────────────────────────
+  deploy:
+    runs-on: self-hosted
+    needs: build
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Prepare deployment directory
         run: |
-          # Create app directory if it doesn't exist
-          mkdir -p ~/monitoring-agent
+          mkdir -p ${{ env.DEPLOY_DIR }}/server/keys
+          sudo chown -R $USER:$USER ${{ env.DEPLOY_DIR }}
 
-          # Ensure the runner user owns the deployment directory (reclaims files created as root by previous docker mounts)
-          sudo chown -R $USER:$USER ~/monitoring-agent
-
-          # Create keys directory
-          mkdir -p ~/monitoring-agent/server/keys
-
-          # Clean up config.json if Docker created it as a directory during a failed mount
-          if [ -d ~/monitoring-agent/server/config.json ]; then
-            rm -rf ~/monitoring-agent/server/config.json
+          # Fix: remove config.json if Docker erroneously created it as a directory
+          if [ -d ${{ env.DEPLOY_DIR }}/server/config.json ]; then
+            rm -rf ${{ env.DEPLOY_DIR }}/server/config.json
           fi
 
-          # Copy default config if it doesn't exist on the host to avoid mount errors
-          if [ ! -f ~/monitoring-agent/server/config.json ]; then
-            cp server/config.example.json ~/monitoring-agent/server/config.json
+          # Seed config only if it doesn't already exist (preserve live config)
+          if [ ! -f ${{ env.DEPLOY_DIR }}/server/config.json ]; then
+            cp server/config.example.json ${{ env.DEPLOY_DIR }}/server/config.json
           fi
 
-          # Copy bastion SSH key from host ~/.ssh/bastion.key if it exists to allow container access
+          # Copy SSH key if available
           if [ -f ~/.ssh/bastion.key ]; then
-            cp ~/.ssh/bastion.key ~/monitoring-agent/server/keys/bastion.key
-            chmod 600 ~/monitoring-agent/server/keys/bastion.key
+            cp ~/.ssh/bastion.key ${{ env.DEPLOY_DIR }}/server/keys/bastion.key
+            chmod 600 ${{ env.DEPLOY_DIR }}/server/keys/bastion.key
           fi
 
-          # Copy configs to deployment directory
-          cp docker-compose.yml ~/monitoring-agent/
+          # Copy latest docker-compose from repo
+          cp docker-compose.yml ${{ env.DEPLOY_DIR }}/
 
-          # Navigate and deploy
-          cd ~/monitoring-agent
-          docker compose up -d --remove-orphans
+      - name: Pull latest image and redeploy
+        run: |
+          cd ${{ env.DEPLOY_DIR }}
+          # Always pull fresh image — prevents stale deploys
+          docker compose pull
+          docker compose up -d --remove-orphans --force-recreate
+          # Clean up old dangling images
           docker image prune -f
 
-          # --- Dynamic Caddy Patching (Avoids modifying professional-portfolio repo) ---
-          # Ensure we have permissions to edit ~/app configs if root-owned
+      - name: Patch Caddy reverse proxy (idempotent)
+        run: |
           if [ -d ~/app ]; then
             sudo chown -R $USER:$USER ~/app
           fi
 
-          # 1. Update Caddyfile in ~/app if it exists and doesn't have the domain
+          # 1. Add monitoring domain to Caddyfile (once)
           if [ -f ~/app/Caddyfile ]; then
             if ! grep -q "rdpubana-monitoring.ddns.net" ~/app/Caddyfile; then
-              echo -e "\nrdpubana-monitoring.ddns.net {\n    reverse_proxy host.docker.internal:4000\n}" >> ~/app/Caddyfile
+              printf '\nrdpubana-monitoring.ddns.net {\n    reverse_proxy host.docker.internal:4000\n}\n' >> ~/app/Caddyfile
             fi
           fi
 
-          # 2. Inject extra_hosts into ~/app/docker-compose.yml if needed
-          python3 -c "
-          import textwrap
-          code = '''
+          # 2. Add host.docker.internal to portfolio docker-compose (once)
+          python3 - <<'EOF'
           import os
           path = '/home/ubuntu/app/docker-compose.yml'
           if os.path.exists(path):
@@ -97,16 +119,27 @@ jobs:
                   for idx, line in enumerate(lines):
                       if 'ports:' in line:
                           lines.insert(idx + 3, '    extra_hosts:')
-                          lines.insert(idx + 4, '      - \"host.docker.internal:host-gateway\"')
+                          lines.insert(idx + 4, '      - "host.docker.internal:host-gateway"')
                           break
                   with open(path, 'w') as f:
                       f.write(os.linesep.join(lines) + os.linesep)
-          '''
-          exec(textwrap.dedent(code))
-          "
+          EOF
 
-          # 3. Recreate Caddy container to load the new config
+          # 3. Reload Caddy to pick up config changes
           if [ -d ~/app ]; then
             cd ~/app
             docker compose up -d --force-recreate caddy
           fi
+
+      - name: Verify deployment
+        run: |
+          echo "Waiting for container to be healthy..."
+          sleep 5
+          STATUS=$(docker inspect --format='{{.State.Status}}' $(docker compose -f ${{ env.DEPLOY_DIR }}/docker-compose.yml ps -q) 2>/dev/null || echo "unknown")
+          echo "Container status: $STATUS"
+          if [ "$STATUS" != "running" ]; then
+            echo "::error::Container is not running after deploy!"
+            docker compose -f ${{ env.DEPLOY_DIR }}/docker-compose.yml logs --tail=50
+            exit 1
+          fi
+          echo "✅ Deployment successful"
