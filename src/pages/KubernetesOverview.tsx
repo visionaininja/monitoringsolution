@@ -747,8 +747,6 @@ return (
                 onChange={(e) => setEnvironment(e.target.value as Environment)}
               >
                 <option value="dev" className="bg-zinc-950 text-foreground">DEV Cluster</option>
-                <option value="staging" className="bg-zinc-950 text-foreground">STAGING Cluster</option>
-                <option value="production" className="bg-zinc-950 text-foreground">PRODUCTION Cluster</option>
               </select>
             </div>
           </div>

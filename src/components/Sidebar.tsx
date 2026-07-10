@@ -41,7 +41,7 @@ const navigation = [
 ]
 
 const ENV_USERNAMES: Record<string, string> = {
-  dev: "dev",
+  dev: "ubuntu",
   staging: "staging",
   production: "production",
 }

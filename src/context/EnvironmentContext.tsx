@@ -28,7 +28,8 @@ const EnvironmentContext = createContext<EnvironmentContextType | null>(null)
 
 export function EnvironmentProvider({ children }: { children: ReactNode }) {
   const [environment, setEnvironmentState] = useState<Environment>(() => {
-    return (localStorage.getItem("k8s_selected_env") as Environment) || "dev"
+    const saved = localStorage.getItem("k8s_selected_env")
+    return (saved === "dev" ? "dev" : "dev")
   })
 
   const [configs, setConfigs] = useState<Record<Environment, K8sEnvConfig>>(() => {

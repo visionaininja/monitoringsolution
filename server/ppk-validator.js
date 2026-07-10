@@ -129,8 +129,12 @@ function buildOpenSSHPrivateKey(ppk) {
 
 function validatePpk(buffer) {
   const text = buffer.toString('utf8')
-  if (text.includes('BEGIN OPENSSH PRIVATE KEY')) {
-    throw new Error('This is an OpenSSH PEM file, not a PPK file. Please upload a .ppk file.')
+  if (text.includes('-----BEGIN ')) {
+    const parsed = parseKey(text)
+    if (parsed instanceof Error) {
+      throw new Error(`Invalid OpenSSH private key: ${parsed.message}`)
+    }
+    return true
   }
   parsePpkFile(text)
   return true
@@ -138,6 +142,15 @@ function validatePpk(buffer) {
 
 function loadPrivateKey(keyPath) {
   const text = fs.readFileSync(keyPath, 'utf8')
+  
+  if (text.includes('-----BEGIN ')) {
+    const parsed = parseKey(text)
+    if (parsed instanceof Error) {
+      throw new Error(`Invalid OpenSSH private key: ${parsed.message}`)
+    }
+    return fs.readFileSync(keyPath)
+  }
+  
   const ppk = parsePpkFile(text)
   const opensshPem = buildOpenSSHPrivateKey(ppk)
   

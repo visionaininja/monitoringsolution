@@ -16,7 +16,7 @@ import { cn } from "@/lib/utils"
 
 // â”€â”€â”€ Constants â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export const ENV_USERNAMES: Record<Environment, string> = {
-  dev: "dev",
+  dev: "ubuntu",
   staging: "staging",
   production: "production",
 }

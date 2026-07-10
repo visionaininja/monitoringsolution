@@ -69,7 +69,7 @@ interface OciLogsResponse {
 type SubnetGroup = "FE" | "BE" | "DB" | "EXT"
 
 export default function NetworkMonitoring() {
-  const [envFilter, setEnvFilter] = useState<"all" | "dev" | "staging" | "prod">("all")
+  const [envFilter, setEnvFilter] = useState<"all" | "dev" | "staging" | "prod">("dev")
   const [searchTerm, setSearchTerm] = useState("")
   const [copied, setCopied] = useState(false)
   const [selectedRawLog, setSelectedRawLog] = useState<OciVcnLog | null>(null)
@@ -356,10 +356,7 @@ export default function NetworkMonitoring() {
             onChange={(e) => setEnvFilter(e.target.value as any)}
             className="bg-transparent border-0 outline-none text-xs text-blue-400 font-bold uppercase cursor-pointer focus:ring-0 focus:border-0 p-0"
           >
-            <option value="all" className="bg-zinc-950 text-zinc-300">All Environments</option>
             <option value="dev" className="bg-zinc-950 text-zinc-300">Development</option>
-            <option value="staging" className="bg-zinc-950 text-zinc-300">Staging</option>
-            <option value="prod" className="bg-zinc-950 text-zinc-300">Production</option>
           </select>
           <button
             onClick={() => refetch()}

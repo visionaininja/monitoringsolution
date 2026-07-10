@@ -28,6 +28,15 @@ app.use((req, res, next) => {
   next();
 });
 
+function getSSHHost(configuredHost) {
+  if (configuredHost === '158.101.46.183' || configuredHost === 'localhost' || configuredHost === '127.0.0.1') {
+    if (fs.existsSync('/.dockerenv')) {
+      return 'host.docker.internal';
+    }
+  }
+  return configuredHost;
+}
+
 function resolveKeyPath(keyRel) {
   return path.isAbsolute(keyRel) ? keyRel : path.resolve(__dirname, keyRel)
 }
@@ -63,7 +72,8 @@ app.post('/api/upload-key', upload.single('key'), (req, res) => {
   try {
     validatePpk(req.file.buffer)
 
-    const keyFilename = `${env}_key.ppk`
+    const isPem = req.file.buffer.toString('utf8').includes('-----BEGIN ')
+    const keyFilename = isPem ? `${env}_key.key` : `${env}_key.ppk`
     const keyPath = path.join(keysDir, keyFilename)
     fs.writeFileSync(keyPath, req.file.buffer, { mode: 0o600 })
 
@@ -75,7 +85,7 @@ app.post('/api/upload-key', upload.single('key'), (req, res) => {
 
     res.json({
       success: true,
-      message: `Uploaded and configured PPK key for ${env} environment`,
+      message: `Uploaded and configured private key for ${env} environment`,
       env,
       keyPath: `keys/${keyFilename}`
     })
@@ -814,7 +824,7 @@ async function fetchRealClusterData(env) {
     }).on('error', (err) => {
       reject(err)
     }).connect({
-      host: envCfg.host,
+      host: getSSHHost(envCfg.host),
       port: Number(envCfg.sshPort || 22),
       username: envCfg.username,
       privateKey
@@ -932,7 +942,7 @@ async function fetchRealMetricsData(env) {
     }).on('error', (err) => {
       reject(err)
     }).connect({
-      host: envCfg.host,
+      host: getSSHHost(envCfg.host),
       port: Number(envCfg.sshPort || 22),
       username: envCfg.username,
       privateKey
@@ -1068,7 +1078,7 @@ app.get('/api/vm-overview', async (req, res) => {
   const envCfg = (CONFIG.envs || {})[env]
   if (!envCfg) return res.status(400).json({ error: 'unknown env' })
 
-  const host = envCfg.host
+  const host = getSSHHost(envCfg.host)
   const username = req.query.username || envCfg.username
   const sshPort = envCfg.sshPort || 22
   const keyRel = envCfg.keyPath || envCfg.pemPath
@@ -1088,7 +1098,11 @@ app.get('/api/vm-overview', async (req, res) => {
       const top = await sshExecText(conn, 'top -b -n 1')
       
       conn.end()
-      res.json({ df, free, top })
+      res.json({
+        df,
+        free,
+        top
+      })
     } catch (err) {
       conn.end()
       res.status(500).json({ error: String(err) })
@@ -1310,7 +1324,7 @@ app.get('/api/docker-network', async (req, res) => {
   const envCfg = (CONFIG.envs || {})[env]
   if (!envCfg) return res.status(400).json({ error: 'unknown env' })
 
-  const host = envCfg.host
+  const host = getSSHHost(envCfg.host)
   const username = req.query.username || envCfg.username
   const sshPort = envCfg.sshPort || 22
   const keyRel = envCfg.keyPath || envCfg.pemPath
@@ -1452,7 +1466,8 @@ app.get('/api/pod-logs', (req, res) => {
   const envCfg = (CONFIG.envs || {})[env]
   if (!envCfg) return res.status(400).json({ error: `unknown env: ${env}` })
 
-  const { host, username, sshPort } = envCfg
+  const { username, sshPort } = envCfg
+  const host = getSSHHost(envCfg.host)
   const keyRel = envCfg.keyPath || envCfg.pemPath
   if (!host || !username || !keyRel) {
     return res.status(400).json({ error: 'incomplete env config. Check server/config.json' })

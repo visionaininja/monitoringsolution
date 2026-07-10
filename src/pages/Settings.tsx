@@ -10,11 +10,9 @@ import { Environment } from "@/context/EnvironmentContext"
 import { useQueryClient } from "@tanstack/react-query"
 import { OciCredentialsSection } from "@/components/OciCredentialsSection"
 
-const VM_HOST = "170.9.233.236"
+const VM_HOST = "158.101.46.183"
 const ENVIRONMENTS: { id: Environment; label: string; username: string; color: string; dot: string }[] = [
-  { id: "dev", label: "Development", username: "dev", color: "border-emerald-500/40 bg-emerald-500/5", dot: "bg-emerald-500" },
-  { id: "staging", label: "Staging", username: "staging", color: "border-amber-500/40 bg-amber-500/5", dot: "bg-amber-500" },
-  { id: "production", label: "Production", username: "production", color: "border-rose-500/40 bg-rose-500/5", dot: "bg-rose-500" },
+  { id: "dev", label: "Development", username: "ubuntu", color: "border-emerald-500/40 bg-emerald-500/5", dot: "bg-emerald-500" },
 ]
 
 // ─── PPK File Picker ──────────────────────────────────────────────────────────
@@ -26,7 +24,7 @@ function PemFilePicker({ env: _env, value, onChange }: { env: Environment; value
     e.preventDefault()
     setIsDragging(false)
     const file = e.dataTransfer.files[0]
-    if (file && file.name.endsWith(".ppk")) {
+    if (file) {
       onChange(file.name)
     }
   }, [onChange])
@@ -51,7 +49,7 @@ function PemFilePicker({ env: _env, value, onChange }: { env: Environment; value
           : "border-border hover:border-primary/50 hover:bg-accent/30"
       )}
     >
-      <input ref={fileInputRef} type="file" accept=".ppk" onChange={handleFileChange} className="hidden" />
+      <input ref={fileInputRef} type="file" onChange={handleFileChange} className="hidden" />
       {value ? (
         <div className="flex items-center gap-2 w-full justify-center">
           <Key className="h-4 w-4 text-amber-400 flex-shrink-0" />
@@ -66,9 +64,9 @@ function PemFilePicker({ env: _env, value, onChange }: { env: Environment; value
       ) : (
         <>
           <Upload className="h-5 w-5 text-muted-foreground mb-2" />
-          <p className="text-xs font-semibold text-foreground">Drop .ppk file here</p>
+          <p className="text-xs font-semibold text-foreground">Drop SSH Key file here</p>
           <p className="text-[11px] text-muted-foreground mt-0.5">or click to browse</p>
-          <p className="text-[10px] text-muted-foreground/60 mt-1">Accepts: .ppk (PuTTY private key)</p>
+          <p className="text-[10px] text-muted-foreground/60 mt-1">Accepts: SSH Private Keys (.key, .pem, .ppk, id_rsa)</p>
         </>
       )}
     </div>
@@ -81,7 +79,7 @@ function K8sEnvCard({ env }: { env: typeof ENVIRONMENTS[0] }) {
   const [saved, setSaved] = useState(false)
 
   useEffect(() => {
-    const stored = localStorage.getItem(`k8s_ppk_${env.id}`) || `${env.id}_key.ppk`
+    const stored = localStorage.getItem(`k8s_ppk_${env.id}`) || "bastion.key"
     setPemFile(stored)
   }, [env.id])
 
@@ -118,7 +116,7 @@ function K8sEnvCard({ env }: { env: typeof ENVIRONMENTS[0] }) {
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">PuTTY Private Key (.ppk)</label>
+          <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">SSH Private Key (bastion.key)</label>
           <PemFilePicker env={env.id} value={pemFile} onChange={setPemFile} />
         </div>
 

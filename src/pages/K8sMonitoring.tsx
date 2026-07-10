@@ -12,9 +12,9 @@ import { cn } from "@/lib/utils"
 import { useEnvironment, Environment } from "@/context/EnvironmentContext"
 
 // ─── Constants ─────────────────────────────────────────────────────────────
-const VM_HOST = "170.9.233.236"
+const VM_HOST = "158.101.46.183"
 const ENV_USERNAMES: Record<Environment, string> = {
-  dev: "dev",
+  dev: "ubuntu",
   staging: "staging",
   production: "production",
 }
@@ -1987,8 +1987,6 @@ export default function K8sMonitoring() {
                 )}
               >
                 <option value="dev" className="bg-background text-foreground">Development</option>
-                <option value="staging" className="bg-background text-foreground">Staging</option>
-                <option value="production" className="bg-background text-foreground">Production</option>
               </select>
               <ChevronDown className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 h-3 w-3 opacity-70" />
             </div>

@@ -48,6 +48,12 @@ jobs:
             cp server/config.example.json ~/monitoring-agent/server/config.json
           fi
 
+          # Copy bastion SSH key from host ~/.ssh/bastion.key if it exists to allow container access
+          if [ -f ~/.ssh/bastion.key ]; then
+            cp ~/.ssh/bastion.key ~/monitoring-agent/server/keys/bastion.key
+            chmod 600 ~/monitoring-agent/server/keys/bastion.key
+          fi
+
           # Copy configs to deployment directory
           cp docker-compose.yml ~/monitoring-agent/
 
