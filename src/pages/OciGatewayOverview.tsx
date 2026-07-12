@@ -314,7 +314,7 @@ export default function OciGatewayOverview() {
       {/* Header Controls */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight flex items-center gap-3">
             <Cloud className="w-8 h-8 text-orange-500" />
             OCI API Overview
           </h1>

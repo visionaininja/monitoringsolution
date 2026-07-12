@@ -49,7 +49,7 @@ const ENV_USERNAMES: Record<string, string> = {
 // ─── Mobile Top Bar ─────────────────────────────────────────────────
 export function MobileTopBar({ onToggle }: { onToggle: () => void }) {
   return (
-    <div className="lg:hidden flex items-center justify-between px-4 py-3 border-b border-border bg-card/80 backdrop-blur-md sticky top-0 z-[100] safe-top">
+    <div className="xl:hidden flex items-center justify-between px-4 py-3 border-b border-border bg-card/80 backdrop-blur-md sticky top-0 z-[100] safe-top">
       <div className="flex items-center gap-3">
         <button
           onClick={onToggle}
@@ -297,14 +297,14 @@ export function Sidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: () =>
 
   return (
     <>
-      {/* ── Desktop Sidebar (always visible on lg+) ── */}
-      <div className="hidden lg:flex h-screen w-64 flex-col border-r bg-card px-3 py-4 flex-shrink-0">
+      {/* ── Desktop Sidebar (always visible on xl+) ── */}
+      <div className="hidden xl:flex h-screen w-64 flex-col border-r bg-card px-3 py-4 flex-shrink-0">
         {sidebarContent}
       </div>
 
       {/* ── Mobile/Tablet Sidebar Drawer Overlay ── */}
       {isOpen && (
-        <div className="lg:hidden fixed inset-0 z-[150] flex">
+        <div className="xl:hidden fixed inset-0 z-[150] flex">
           {/* Backdrop */}
           <div
             className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300"

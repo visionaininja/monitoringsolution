@@ -647,7 +647,7 @@ export default function GitHubMonitoring() {
       {/* Top Header Section */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">GitHub Monitoring</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">GitHub Monitoring</h1>
           <p className="text-muted-foreground">Monitor commits, pull requests, branches, workflows and vulnerabilities.</p>
         </div>
 
@@ -1189,6 +1189,7 @@ export default function GitHubMonitoring() {
                             })}
                           </TableBody>
                         </Table>
+                        </div>
                         <PaginationBar page={runsPage} totalItems={filteredRuns.length} onPageChange={setRunsPage} />
                       </div>
                     )}
@@ -1249,6 +1250,7 @@ export default function GitHubMonitoring() {
                           ))}
                         </TableBody>
                       </Table>
+                      </div>
                       <PaginationBar page={branchesPage} totalItems={filteredBranches.length} onPageChange={setBranchesPage} />
                     </>
                   )}
