@@ -75,7 +75,7 @@ function ConnectionGauge({ connections }: { connections: ConnectionStats }) {
         <div className="text-3xl font-bold" style={{ color: gColor }}>{pct}%</div>
         <div className="text-xs text-muted-foreground">Utilization</div>
       </div>
-      <div className="grid grid-cols-3 gap-3 w-full mt-2">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full mt-2">
         {stats.map(s => (
           <div key={s.label} className="text-center">
             <div className={cn("text-lg font-bold", s.color)}>{s.value}</div>
@@ -202,7 +202,7 @@ export default function DatabaseMonitoring() {
       </div>
 
       {/* Stat Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
         <StatCard icon={Users} label="Active Connections" value={conn?.active ?? "—"} sub={`of ${conn?.max ?? 200} max`} color="text-emerald-400" alert={(conn?.active ?? 0) > 150} />
         <StatCard icon={Activity} label="Connection Utilization" value={conn ? `${Math.round(conn.utilization)}%` : "—"} sub="Active + Idle vs Max" color="text-blue-400" alert={(conn?.utilization ?? 0) > 80} />
         <StatCard icon={Shield} label="Cache Hit Ratio" value={pgData ? `${pgData.cacheHitRatio}%` : "—"} sub="Buffer cache efficiency" color="text-indigo-400" alert={(pgData?.cacheHitRatio ?? 100) < 90} />
@@ -237,7 +237,7 @@ export default function DatabaseMonitoring() {
           </p>
           {pool ? (
             <div className="space-y-3">
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {poolBars.map(item => (
                   <div key={item.label} className="rounded-lg bg-muted/30 p-3">
                     <div className="flex items-center justify-between mb-2">
@@ -371,7 +371,7 @@ export default function DatabaseMonitoring() {
             </span>
           )}
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
           {healthItems.map(item => (
             <div key={item.label} className="flex items-center gap-2 rounded-lg bg-muted/20 px-3 py-2">
               {item.ok

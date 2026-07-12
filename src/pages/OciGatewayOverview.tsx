@@ -352,7 +352,7 @@ export default function OciGatewayOverview() {
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard title={`Total Requests (${timeRange})`} value={totalRequests.toLocaleString()} icon={Activity} description="Incoming API Calls" trend={undefined} colorClass="text-emerald-500" onClick={() => openPointLogs("Total Time Slice", Date.now(), totalRequests || 45)} />
         <StatCard title="Avg Latency" value={`${avgLatency} ms`} icon={Clock} description="Response Time" trend={undefined} colorClass="text-amber-500" onClick={() => openPointLogs("Current Window", Date.now(), 30)} />
         <StatCard title="Bytes Received" value={formatBytes(totalBytesIn)} icon={ArrowRightLeft} description="Ingress Traffic" trend={undefined} colorClass="text-blue-500" onClick={() => openPointLogs("Ingress Window", Date.now(), 25)} />

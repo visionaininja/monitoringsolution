@@ -369,7 +369,7 @@ export default function NetworkMonitoring() {
       </div>
 
       {/* ROW 1: VCN Perimeter Traffic */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
         {/* ROW 1 CARD 1: Stacked REJECT + ACCEPT stat cards */}
         <div className="flex flex-col gap-4">
           {/* REJECT Card */}
@@ -420,7 +420,7 @@ export default function NetworkMonitoring() {
         </div>
 
         {/* ROW 1 CARD 2: Bar Chart External Talkers by Date */}
-        <div className="bg-zinc-900/20 border border-zinc-800 p-6 rounded-2xl lg:col-span-2 flex flex-col justify-between">
+        <div className="bg-zinc-900/20 border border-zinc-800 p-6 rounded-2xl md:col-span-2 lg:col-span-2 flex flex-col justify-between">
           <div className="flex items-start justify-between">
             <div>
               <h2 className="text-sm font-bold text-zinc-200 flex items-center gap-2">
@@ -512,7 +512,7 @@ export default function NetworkMonitoring() {
       </div>
 
       {/* ROW 2: OCI Gateways & Ingress Drop Rate */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
         {/* ROW 2 CARD 1: Gateway Visual Stats */}
         <div className="bg-zinc-900/20 border border-zinc-800 p-6 rounded-2xl flex flex-col justify-between gap-4">
           <div>
@@ -563,7 +563,7 @@ export default function NetworkMonitoring() {
         </div>
 
         {/* ROW 2 CARD 2: Public Subnet Drop Rate Chart */}
-        <div className="bg-zinc-900/20 border border-zinc-800 p-6 rounded-2xl lg:col-span-2 flex flex-col justify-between">
+        <div className="bg-zinc-900/20 border border-zinc-800 p-6 rounded-2xl md:col-span-2 lg:col-span-2 flex flex-col justify-between">
           <div>
             <h2 className="text-sm font-bold text-zinc-200 flex items-center gap-2">
               <Activity className="h-4 w-4 text-emerald-450" />
@@ -611,9 +611,9 @@ export default function NetworkMonitoring() {
       </div>
 
       {/* ROW 3: East-West Heatmap & Postgres Database Subnet Gauge */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
         {/* ROW 3 CARD 1: Heatmap traffic matrix */}
-        <div className="bg-zinc-900/20 border border-zinc-800 p-6 rounded-2xl lg:col-span-2 flex flex-col justify-between">
+        <div className="bg-zinc-900/20 border border-zinc-800 p-4 sm:p-6 rounded-2xl md:col-span-2 lg:col-span-2 flex flex-col justify-between">
           <div>
             <h2 className="text-sm font-bold text-zinc-200 flex items-center gap-2">
               <ArrowRightLeft className="h-4 w-4 text-blue-400" />
@@ -622,7 +622,7 @@ export default function NetworkMonitoring() {
             <p className="text-[10px] text-zinc-500 mt-0.5">Click any subnet intersection cell to pop up raw flow metrics</p>
           </div>
 
-          <div className="grid grid-cols-4 gap-2 mt-4 font-mono text-[10px] text-center text-zinc-400">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-4 font-mono text-[10px] text-center text-zinc-400 mobile-scroll-x">
             <div>Src / Dst</div>
             <div className="font-bold text-zinc-300">FE (10.0.2.x)</div>
             <div className="font-bold text-zinc-300">BE (10.0.1.x)</div>

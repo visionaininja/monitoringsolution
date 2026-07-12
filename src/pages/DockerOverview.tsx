@@ -320,7 +320,7 @@ function DockerOverviewSection({ environment }: { environment: Environment }) {
         )}
 
         {/* â”€â”€ Stat row â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
-        <div className="grid gap-4 grid-cols-2 md:grid-cols-3 xl:grid-cols-6">
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6">
           {/* Quota gauge card (Clickable to show recently pulled tags) */}
           <div 
             onClick={() => setShowTagsModal(true)}
@@ -476,10 +476,10 @@ function DockerOverviewSection({ environment }: { environment: Environment }) {
         </div>
 
         {/* â”€â”€ Detail widgets row â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
-        <div className="grid gap-4 grid-cols-1 lg:grid-cols-12">
+        <div className="grid gap-4 grid-cols-1 md:grid-cols-12">
 
           {/* Left: Pull counts VERTICAL bar chart */}
-          <div className="lg:col-span-7 rounded-xl border border-border bg-card p-4 space-y-3">
+          <div className="md:col-span-7 rounded-xl border border-border bg-card p-4 space-y-3">
             <div className="flex items-center justify-between border-b border-border pb-2">
               <div>
                 <h2 className="font-semibold text-sm">Repository Pull Counts</h2>
@@ -532,7 +532,7 @@ function DockerOverviewSection({ environment }: { environment: Environment }) {
           {/* Right: Average Daily Pulls Trend */}
           <div 
             onClick={() => window.open(`https://hub.docker.com/u/${hubData?.username || 'yourspeakadmin'}`, '_blank')}
-            className="lg:col-span-5 rounded-xl border border-border bg-card p-4 space-y-3 flex flex-col cursor-pointer hover:border-cyan-500/30 hover:shadow-[0_0_15px_rgba(34,211,238,0.05)] transition-all group"
+            className="md:col-span-5 rounded-xl border border-border bg-card p-4 space-y-3 flex flex-col cursor-pointer hover:border-cyan-500/30 hover:shadow-[0_0_15px_rgba(34,211,238,0.05)] transition-all group"
           >
             <div className="flex items-center justify-between border-b border-border pb-2 group-hover:border-cyan-500/20 transition-colors">
               <div>

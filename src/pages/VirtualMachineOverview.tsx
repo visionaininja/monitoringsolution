@@ -579,7 +579,7 @@ const toLocalDate = (dateStr: string | number | Date | undefined) => {
               <span className="text-xs font-mono font-semibold text-zinc-200 truncate">{n.name}</span>
               <span className={cn("text-[9px] font-bold px-2 py-0.5 rounded-full border uppercase tracking-wider flex-shrink-0", n.status === "Ready" ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-rose-500/10 text-rose-400 border-rose-500/20")}>{n.status}</span>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <div className="flex justify-between text-[9px] font-mono mb-1"><span className="text-zinc-500">CPU</span><span className="text-zinc-300 font-semibold">{n.cpu}%</span></div>
                 <div className="h-1.5 rounded-full bg-zinc-800 overflow-hidden"><div className={cn("h-full rounded-full transition-all", n.cpu > 80 ? "bg-rose-500" : n.cpu > 60 ? "bg-amber-500" : "bg-blue-500")} style={{ width: `${Math.min(100,n.cpu)}%` }} /></div>

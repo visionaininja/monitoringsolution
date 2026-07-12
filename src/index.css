@@ -33,6 +33,12 @@
     --ring: 212.7 26.8% 83.9%;
 
     --radius: 0.5rem;
+
+    /* Safe area insets for notched devices */
+    --sat: env(safe-area-inset-top, 0px);
+    --sar: env(safe-area-inset-right, 0px);
+    --sab: env(safe-area-inset-bottom, 0px);
+    --sal: env(safe-area-inset-left, 0px);
   }
 }
 
@@ -42,5 +48,48 @@
   }
   body {
     @apply bg-background text-foreground font-sans antialiased;
+  }
+  /* Smooth scrolling for the whole app */
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+@layer utilities {
+  /* Hide scrollbar utility */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Touch-friendly tap targets */
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Safe area padding helpers */
+  .safe-top {
+    padding-top: var(--sat);
+  }
+  .safe-bottom {
+    padding-bottom: var(--sab);
+  }
+  .safe-left {
+    padding-left: var(--sal);
+  }
+  .safe-right {
+    padding-right: var(--sar);
+  }
+
+  /* Mobile-optimized overflow for tables */
+  .mobile-scroll-x {
+    @apply overflow-x-auto;
+    -webkit-overflow-scrolling: touch;
   }
 }

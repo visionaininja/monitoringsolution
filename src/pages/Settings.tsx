@@ -100,7 +100,7 @@ function K8sEnvCard({ env }: { env: typeof ENVIRONMENTS[0] }) {
       </div>
 
       <div className="space-y-3">
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           <div className="space-y-1">
             <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">VM Host</label>
             <div className="h-8 flex items-center rounded-md border border-input bg-muted/40 px-2.5 text-xs font-mono text-muted-foreground">

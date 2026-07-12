@@ -678,7 +678,7 @@ export default function GitHubMonitoring() {
       </div>
 
       {/* Overview stats cards grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         {/* Branches Summary Card */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -1053,6 +1053,7 @@ export default function GitHubMonitoring() {
                     </div>
                   ) : (
                     <>
+                      <div className="mobile-scroll-x">
                       <Table>
                         <TableHeader>
                           <TableRow>
@@ -1095,6 +1096,7 @@ export default function GitHubMonitoring() {
                           })}
                         </TableBody>
                       </Table>
+                      </div>
                       <PaginationBar page={prsPage} totalItems={filteredPRs.length} onPageChange={setPrsPage} />
                     </>
                   )}
@@ -1134,6 +1136,7 @@ export default function GitHubMonitoring() {
                       <p className="text-xs text-muted-foreground border rounded-md p-3 bg-secondary/20">No workflow run histories.</p>
                     ) : (
                       <div className="overflow-x-auto">
+                        <div className="mobile-scroll-x">
                         <Table>
                           <TableHeader>
                             <TableRow>
@@ -1204,6 +1207,7 @@ export default function GitHubMonitoring() {
                     <div className="text-sm text-muted-foreground py-8 text-center">No branches found.</div>
                   ) : (
                     <>
+                      <div className="mobile-scroll-x">
                       <Table>
                         <TableHeader>
                           <TableRow>

@@ -81,17 +81,17 @@ export default function Login() {
   return (
     <div className="min-h-screen bg-[#050505] flex items-center justify-center relative overflow-hidden">
       {/* Dynamic Background Effects */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-[128px] pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-[128px] pointer-events-none" />
+      <div className="absolute top-1/4 left-1/4 w-48 h-48 sm:w-96 sm:h-96 bg-cyan-500/10 rounded-full blur-[80px] sm:blur-[128px] pointer-events-none" />
+      <div className="absolute bottom-1/4 right-1/4 w-48 h-48 sm:w-96 sm:h-96 bg-purple-500/10 rounded-full blur-[80px] sm:blur-[128px] pointer-events-none" />
       
-      <div className="z-10 w-full max-w-md p-8 relative">
-        <div className="rounded-2xl border border-white/10 bg-black/40 backdrop-blur-xl shadow-2xl p-8 relative overflow-hidden group">
+      <div className="z-10 w-full max-w-md px-4 py-6 sm:p-8 relative">
+        <div className="rounded-2xl border border-white/10 bg-black/40 backdrop-blur-xl shadow-2xl p-5 sm:p-8 relative overflow-hidden group">
           <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-purple-500/5 pointer-events-none" />
           
           <div className="flex flex-col items-center text-center space-y-6 relative z-10">
             {/* Futuristic AI Core Mascot */}
             <div className={cn(
-              "h-32 w-32 rounded-full flex items-center justify-center relative transition-all duration-700 ease-in-out z-20",
+              "h-24 w-24 sm:h-32 sm:w-32 rounded-full flex items-center justify-center relative transition-all duration-700 ease-in-out z-20",
               isLockedOut ? "scale-110" : "hover:scale-105"
             )}>
               {/* Outer Atmospheric Glow */}
@@ -169,7 +169,7 @@ export default function Login() {
 
             {/* Title & Subtitle */}
             <div className="space-y-2">
-              <h1 className="text-2xl font-black tracking-tight text-white">Yourspeak Admin</h1>
+              <h1 className="text-xl sm:text-2xl font-black tracking-tight text-white">Yourspeak Admin</h1>
               <p className="text-sm text-zinc-400">
                 Please enter your credentials to securely access the monitoring dashboard.
               </p>

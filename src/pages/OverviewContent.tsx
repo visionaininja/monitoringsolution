@@ -567,7 +567,7 @@ export default function Overview() {
               <span className="text-xs font-mono font-semibold text-zinc-200 truncate">{n.name}</span>
               <span className={cn("text-[9px] font-bold px-2 py-0.5 rounded-full border uppercase tracking-wider flex-shrink-0", n.status === "Ready" ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-rose-500/10 text-rose-400 border-rose-500/20")}>{n.status}</span>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <div className="flex justify-between text-[9px] font-mono mb-1"><span className="text-zinc-500">CPU</span><span className="text-zinc-300 font-semibold">{n.cpu}%</span></div>
                 <div className="h-1.5 rounded-full bg-zinc-800 overflow-hidden"><div className={cn("h-full rounded-full transition-all", n.cpu > 80 ? "bg-rose-500" : n.cpu > 60 ? "bg-amber-500" : "bg-blue-500")} style={{ width: `${Math.min(100,n.cpu)}%` }} /></div>
@@ -799,14 +799,14 @@ export default function Overview() {
             </div>
 
             {/* Kubernetes detail widgets */}
-            <div className="grid gap-4 grid-cols-1 lg:grid-cols-12">
+            <div className="grid gap-4 grid-cols-1 md:grid-cols-12">
               {/* Live Telemetry Speedometers */}
-              <div className="lg:col-span-5">
+              <div className="md:col-span-5">
                 <SpeedometersCard cpu={avgCpu} mem={avgMem} />
               </div>
 
               {/* Cluster Host VMs */}
-              <div className="lg:col-span-7">
+              <div className="md:col-span-7">
                 <div className="rounded-xl border border-border bg-card p-5 space-y-4 h-full flex flex-col">
                   <div className="flex items-center justify-between border-b border-border pb-3 flex-shrink-0">
                     <div className="flex flex-wrap items-baseline gap-2">
@@ -825,7 +825,7 @@ export default function Overview() {
                       {k8sClusterQuery.isError ? "Connection refused (offline)" : "No host VM nodes returned from cluster API."}
                     </div>
                   ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 flex-1 overflow-y-auto pr-1 scrollbar-thin">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 flex-1 overflow-y-auto pr-1 scrollbar-thin">
                       {nodes.map((node: NodeInfo) => (
                         <div key={node.name} className="flex flex-col justify-between p-3 rounded-xl bg-zinc-950 border border-zinc-900/60 hover:border-zinc-800 transition-colors h-full min-h-[106px]">
                           {/* Node Header */}
@@ -1077,9 +1077,9 @@ export default function Overview() {
             </div>
 
             {/* GitHub detail widgets */}
-            <div className="grid gap-4 grid-cols-1 lg:grid-cols-12">
+            <div className="grid gap-4 grid-cols-1 md:grid-cols-12">
               {/* Left: Commit Velocity + PRs + CI/CD */}
-              <div className="lg:col-span-7 space-y-4">
+              <div className="md:col-span-7 space-y-4">
                 {/* Commit Sparkline Chart */}
                 <div className="block w-full text-left rounded-xl border border-border bg-card p-5 space-y-4 hover:border-emerald-500/50 transition-colors group">
                   <div className="flex items-center justify-between border-b border-border pb-3">
@@ -1221,7 +1221,7 @@ export default function Overview() {
               </div>
 
               {/* Right: Top Contributors */}
-              <div className="lg:col-span-5">
+              <div className="md:col-span-5">
                 <div className="rounded-xl border border-border bg-card overflow-hidden">
                   <div className="px-5 py-4 border-b border-border flex items-center justify-between">
                     <div>

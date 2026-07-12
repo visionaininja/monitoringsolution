@@ -1,6 +1,6 @@
-import { NavLink } from "react-router-dom"
-import { useState } from "react"
-import { LayoutDashboard, Server, Github, Bot, Settings, TerminalSquare, LogOut, ChevronDown, ChevronRight, Headset, Network, Database } from "lucide-react"
+import { NavLink, useLocation } from "react-router-dom"
+import { useState, useEffect } from "react"
+import { LayoutDashboard, Server, Github, Bot, Settings, LogOut, ChevronDown, ChevronRight, Headset, Network, Database, Menu, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useQueryClient } from "@tanstack/react-query"
 import { useEnvironment } from "@/context/EnvironmentContext"
@@ -46,11 +46,41 @@ const ENV_USERNAMES: Record<string, string> = {
   production: "production",
 }
 
-export function Sidebar() {
+// ─── Mobile Top Bar ─────────────────────────────────────────────────
+export function MobileTopBar({ onToggle }: { onToggle: () => void }) {
+  return (
+    <div className="lg:hidden flex items-center justify-between px-4 py-3 border-b border-border bg-card/80 backdrop-blur-md sticky top-0 z-[100] safe-top">
+      <div className="flex items-center gap-3">
+        <button
+          onClick={onToggle}
+          className="p-2 rounded-lg hover:bg-accent/50 text-foreground transition-colors touch-target flex items-center justify-center"
+          aria-label="Toggle navigation menu"
+        >
+          <Menu className="h-5 w-5" />
+        </button>
+        <div className="flex items-center">
+          <img src="/logo.svg" alt="Yourspeak Logo" className="h-7 w-7 object-contain drop-shadow-md" />
+          <span className="ml-2 text-sm font-bold tracking-tight text-foreground">Yourspeak Hub</span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── Sidebar Component ──────────────────────────────────────────────
+export function Sidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: () => void }) {
   const queryClient = useQueryClient()
   const { environment } = useEnvironment()
   const { user, logout } = useAuth()
   const [isOverviewExpanded, setIsOverviewExpanded] = useState(true)
+  const location = useLocation()
+
+  // Auto-close sidebar on route change (mobile)
+  useEffect(() => {
+    if (onClose) {
+      onClose()
+    }
+  }, [location.pathname]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handlePrefetch = async (href: string) => {
     const sharedOpts = { staleTime: 2 * 60 * 1000 }
@@ -161,14 +191,15 @@ export function Sidebar() {
     }
   }
 
-  return (
-    <div className="flex h-screen w-64 flex-col border-r bg-card px-3 py-4">
+  const sidebarContent = (
+    <>
+      {/* Logo section — hidden on mobile (shown in MobileTopBar instead) */}
       <div className="mb-6 flex items-center px-3">
         <img src="/logo.svg" alt="Yourspeak Logo" className="h-10 w-10 object-contain drop-shadow-md" />
         <span className="ml-3 text-lg font-bold tracking-tight text-foreground">Yourspeak Monitoring Hub</span>
       </div>
 
-      <nav className="flex-1 space-y-1">
+      <nav className="flex-1 space-y-1 overflow-y-auto scrollbar-hide">
         {navigation.map((item) => {
           const Icon = item.icon
 
@@ -177,7 +208,7 @@ export function Sidebar() {
               <div key={item.name}>
                 <button
                   onClick={() => setIsOverviewExpanded(!isOverviewExpanded)}
-                  className="w-full group flex items-center justify-between rounded-md px-3 py-2 text-sm font-medium transition-colors text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+                  className="w-full group flex items-center justify-between rounded-md px-3 py-2 text-sm font-medium transition-colors text-muted-foreground hover:bg-accent/50 hover:text-foreground touch-target"
                 >
                   <div className="flex items-center">
                     <Icon className="mr-3 h-5 w-5 flex-shrink-0" aria-hidden="true" />
@@ -195,7 +226,7 @@ export function Sidebar() {
                         to={child.href}
                         className={({ isActive }) =>
                           cn(
-                            "block rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                            "block rounded-md px-3 py-2 text-sm font-medium transition-colors touch-target",
                             isActive
                               ? "bg-accent text-accent-foreground"
                               : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
@@ -218,7 +249,7 @@ export function Sidebar() {
                 onMouseEnter={() => handlePrefetch(item.href)}
                 className={({ isActive }) =>
                   cn(
-                    "group flex items-center justify-between rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                    "group flex items-center justify-between rounded-md px-3 py-2 text-sm font-medium transition-colors touch-target",
                     isActive
                       ? "bg-accent text-accent-foreground"
                       : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
@@ -235,13 +266,13 @@ export function Sidebar() {
         })}
       </nav>
       
-      <div className="mt-auto px-3 py-4 border-t border-border mt-4">
+      <div className="mt-auto px-3 py-4 border-t border-border mt-4 safe-bottom">
         {user ? (
           <div className="flex items-center gap-3">
             {user.picture ? (
-              <img src={user.picture} alt={user.name} className="h-8 w-8 rounded-full border border-border" />
+              <img src={user.picture} alt={user.name} className="h-8 w-8 rounded-full border border-border flex-shrink-0" />
             ) : (
-              <div className="h-8 w-8 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold text-xs">
+              <div className="h-8 w-8 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold text-xs flex-shrink-0">
                 {user.name?.charAt(0) || user.email?.charAt(0)}
               </div>
             )}
@@ -261,6 +292,41 @@ export function Sidebar() {
           <p className="text-xs text-muted-foreground">Hub Version 1.0.0</p>
         )}
       </div>
-    </div>
+    </>
+  )
+
+  return (
+    <>
+      {/* ── Desktop Sidebar (always visible on lg+) ── */}
+      <div className="hidden lg:flex h-screen w-64 flex-col border-r bg-card px-3 py-4 flex-shrink-0">
+        {sidebarContent}
+      </div>
+
+      {/* ── Mobile/Tablet Sidebar Drawer Overlay ── */}
+      {isOpen && (
+        <div className="lg:hidden fixed inset-0 z-[150] flex">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300"
+            onClick={onClose}
+            aria-label="Close navigation"
+          />
+          {/* Drawer */}
+          <div className="relative z-10 flex h-full w-72 max-w-[85vw] flex-col bg-card border-r border-border shadow-2xl animate-in slide-in-from-left duration-300 safe-top">
+            {/* Close button */}
+            <div className="flex items-center justify-end px-3 pt-3">
+              <button
+                onClick={onClose}
+                className="p-2 rounded-lg hover:bg-accent/50 text-muted-foreground hover:text-foreground transition-colors touch-target flex items-center justify-center"
+                aria-label="Close menu"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            {sidebarContent}
+          </div>
+        </div>
+      )}
+    </>
   )
 }

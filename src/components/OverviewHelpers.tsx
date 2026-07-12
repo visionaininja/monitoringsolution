@@ -61,8 +61,8 @@ export function DetailOverlay({ panel, onClose }: { panel: OverlayPanel | null; 
     <div className="fixed inset-0 z-[200] flex items-start justify-end" role="dialog">
       {/* backdrop */}
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-      {/* drawer */}
-      <div className="relative z-10 h-full w-full max-w-lg flex flex-col bg-zinc-950 border-l border-zinc-800 shadow-2xl animate-in slide-in-from-right duration-300">
+      {/* drawer — full-width on mobile, max-w-lg on tablet+ */}
+      <div className="relative z-10 h-full w-full max-w-full sm:max-w-lg flex flex-col bg-zinc-950 border-l border-zinc-800 shadow-2xl animate-in slide-in-from-right duration-300">
         {/* header */}
         <div className={cn("flex items-center gap-3 px-5 py-4 border-b border-zinc-800 bg-zinc-950/80 backdrop-blur-md flex-shrink-0")}>
           <div className="h-8 w-8 rounded-lg flex items-center justify-center" style={{ background: `${panel.accentColor}18` }}>
@@ -94,7 +94,7 @@ export function StatCard({ icon: Icon, label, value, sub, color, bg, loading, on
     <div
       onClick={onClick}
       className={cn(
-        "rounded-xl border border-border bg-card p-5 space-y-3 hover:scale-[1.01] hover:border-zinc-600 hover:shadow-lg transition-all duration-300 relative overflow-hidden group",
+        "rounded-xl border border-border bg-card p-3 sm:p-4 md:p-5 space-y-2 sm:space-y-3 hover:scale-[1.01] hover:border-zinc-600 hover:shadow-lg transition-all duration-300 relative overflow-hidden group",
         onClick && "cursor-pointer hover:ring-1 hover:ring-zinc-600/50"
       )}
     >
@@ -112,7 +112,7 @@ export function StatCard({ icon: Icon, label, value, sub, color, bg, loading, on
         </div>
       ) : (
         <div>
-          <div className="text-2xl font-bold tracking-tight text-foreground">{value}</div>
+          <div className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">{value}</div>
           {sub && <p className="text-xs text-muted-foreground mt-0.5">{sub}</p>}
           {onClick && <p className="text-[9px] text-zinc-600 mt-1 group-hover:text-zinc-400 transition-colors">Click to expand</p>}
         </div>
@@ -132,7 +132,7 @@ export function DonutStatCard({ icon: Icon, label, value, sub, colorClass, strok
     <div
       onClick={onClick}
       className={cn(
-        "rounded-xl border border-zinc-800/80 bg-[#0c0c0e] hover:border-zinc-700 transition-all duration-300 group flex flex-col relative overflow-hidden h-[196px]",
+        "rounded-xl border border-zinc-800/80 bg-[#0c0c0e] hover:border-zinc-700 transition-all duration-300 group flex flex-col relative overflow-hidden h-auto min-h-[160px] sm:h-[196px]",
         onClick && "cursor-pointer hover:ring-1 hover:ring-zinc-600/50"
       )}
     >
@@ -339,7 +339,7 @@ function TelemetryLineChartCard({ cpu, mem, disk }: { cpu: number, mem: number, 
       </div>
 
       {/* Charts grid */}
-      <div className={cn("flex-1 grid divide-x divide-zinc-800/80", hasDisk ? "grid-cols-3" : "grid-cols-2")} style={{ minHeight: '180px' }}>
+      <div className={cn("flex-1 grid divide-y sm:divide-y-0 sm:divide-x divide-zinc-800/80", hasDisk ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" : "grid-cols-1 sm:grid-cols-2")} style={{ minHeight: '180px' }}>
         <MetricLineChart label="CPU Usage" value={cpu} color="#60a5fa" gradientId="cpuGrad" />
         <MetricLineChart label="RAM Usage" value={mem} color="#c084fc" gradientId="memGrad" />
         {hasDisk && <MetricLineChart label="Disk Usage" value={disk} color="#34d399" gradientId="diskGrad" />}
